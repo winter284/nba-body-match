@@ -21,7 +21,7 @@ button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:22px
 @media(max-width:430px){.wrap{padding:15px 12px 35px}.tag{font-size:9px}.result{grid-template-columns:38px minmax(0,1fr) 62px;gap:8px;padding:10px}.avatar{width:36px;height:36px;font-size:12px}.name{font-size:13px}.percent{font-size:19px}.pill{font-size:9px}.details{gap:6px}.metric{font-size:9px}}
 
 .player-link{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:#f4f7fa;font-weight:850;font-size:14px;text-align:left;cursor:pointer}
-.player-link:after{content:"▶";font-size:9px;color:var(--orange);border:1px solid #75432f;border-radius:50%;width:17px;height:17px;display:inline-grid;place-items:center;padding-left:1px}
+.player-link:after{content:none}
 .player-link:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
 .video-modal{position:fixed;inset:0;z-index:50;background:#02070bdc;display:none;align-items:center;justify-content:center;padding:18px}
 .video-modal.open{display:flex}
@@ -47,11 +47,15 @@ button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:22px
 .watch-label{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:#ff6b35;color:#15100d;font-size:11px;font-weight:900;white-space:nowrap}
 .player-link:hover .watch-label{background:#ffd166}
 
-</style>
+
+.player-link{touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,113,56,.22)}
+.video-modal{z-index:9999;pointer-events:auto}
+.video-modal.open{display:flex!important}
+\n</style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div class="brand">COURTSIDE <span>LAB</span> / NBA BODY MATCH</div><div class="tag">身体模板匹配实验室 · V6</div></header>
+<header class="top"><div class="brand">COURTSIDE <span>LAB</span> / NBA BODY MATCH</div><div class="tag">身体模板匹配实验室 · V10</div></header>
 <section class="hero"><div class="eyebrow">FIND YOUR NBA BODY ARCHETYPE</div><h1>你的身体数据，<br><em>像哪位 NBA 球星？</em></h1><p>不是简单比较谁更高、谁更重。我们先把你的身高放进普通人基准区间，再映射到 NBA 身高区间，最后结合场上位置、臂展比例与体型指标，寻找身体模板接近的球员。</p></section>
 <main class="layout">
 <section class="card">
@@ -73,7 +77,7 @@ button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:22px
 <details class="method"><summary>查看算法说明与数据限制</summary><p>普通人区间位置 = (你的身高 − 160) ÷ 40；NBA 映射身高 = 160 + 区间位置 × 64。综合分采用启发式距离模型，权重为映射身高 45%、臂展/身高比 35%、BMI 20%。位置相同的球员优先展示；邻近位置作为补充。球员身高、臂展、体重均为近似参考数据，不同来源和赛季可能存在差异。该工具仅作娱乐和体型比较，不代表球技、运动能力或专业体测结论。</p></details>
 </section>
 </main>
-<div class="footer">COURTSIDE LAB · NBA BODY MATCH V6<br>数据为原型参考值；不构成官方 NBA 数据库、医学建议或运动能力评估。</div>
+<div class="footer">COURTSIDE LAB · NBA BODY MATCH V9<br>数据为原型参考值；不构成官方 NBA 数据库、医学建议或运动能力评估。</div>
 </div>
 
 <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoTitle">
@@ -158,7 +162,6 @@ function openPlayerVideo(enName,cnName){
   const item=items[0];
   const choices=items.length>1?'<div class="video-actions" id="videoChoices">'+items.map((v,i)=>'<button class="video-action alt" type="button" data-video-index="'+i+'">'+(i+1)+'. '+v.title+'</button>').join('')+'</div>':'';
   screen.innerHTML='<iframe id="biliPlayer" title="'+cnName+'经典视频" src="https://player.bilibili.com/player.html?bvid='+item.bvid+'&autoplay=0&page=1" allowfullscreen="true" scrolling="no" referrerpolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture"></iframe>';
-  $("videoPrompt").textContent="";
   $("videoCaption").textContent="当前视频："+item.title+"。若无法内嵌播放，可使用下方哔哩哔哩备用入口。视频由第三方平台托管。";
   $("biliFallback").textContent="无法播放？前往哔哩哔哩打开视频";
   if(choices){
@@ -188,10 +191,17 @@ function closePlayerVideo(){
 $("closeVideo").addEventListener("click",closePlayerVideo);
 videoModal.addEventListener("click",e=>{if(e.target===videoModal)closePlayerVideo();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerVideo();});
-$("results").addEventListener("click",e=>{
- const btn=e.target.closest(".player-link");
- if(btn)openPlayerVideo(decodeURIComponent(btn.dataset.player),btn.dataset.cn);
-});
+// iOS Safari 稳定点击：在 document 捕获阶段监听动态生成的球星按钮
+document.addEventListener("click",e=>{
+ const btn=e.target && e.target.closest ? e.target.closest(".player-link") : null;
+ if(!btn)return;
+ e.preventDefault();
+ e.stopPropagation();
+ const enName=decodeURIComponent(btn.getAttribute("data-player") || "");
+ const cnName=btn.getAttribute("data-cn") || "球星";
+ openPlayerVideo(enName,cnName);
+},true);
+window.openPlayerVideo=openPlayerVideo;
 
 document.querySelectorAll(".pos").forEach(btn=>btn.addEventListener("click",()=>{selectedPosition=btn.dataset.pos;document.querySelectorAll(".pos").forEach(b=>b.classList.toggle("active",b===btn));}));
 function clamp(n){return Math.max(0,Math.min(100,Math.round(n)));}
