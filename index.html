@@ -19,11 +19,34 @@ button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:22px
 .note{margin-top:14px;padding:12px 13px;border-radius:10px;background:#182631;color:#aebdca;font-size:11px;line-height:1.7;border-left:3px solid var(--gold)}.note strong{color:var(--gold)}.footer{color:#718291;font-size:10px;line-height:1.8;margin-top:25px;text-align:center}.hidden{display:none!important}.error{color:#ffad91;font-size:11px;min-height:16px;margin-top:8px}.count{font-size:11px;color:var(--muted)}.method{margin-top:13px;border:1px solid var(--line);border-radius:11px;padding:12px}.method summary{cursor:pointer;font-size:12px;font-weight:800;color:#dce5ed}.method p{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:0}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.hero{padding:30px 0 22px}.card{padding:18px}.empty{min-height:220px}}
 @media(max-width:430px){.wrap{padding:15px 12px 35px}.tag{font-size:9px}.result{grid-template-columns:38px minmax(0,1fr) 62px;gap:8px;padding:10px}.avatar{width:36px;height:36px;font-size:12px}.name{font-size:13px}.percent{font-size:19px}.pill{font-size:9px}.details{gap:6px}.metric{font-size:9px}}
-</style>
+
+.player-link{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:#f4f7fa;font-weight:850;font-size:14px;text-align:left;cursor:pointer}
+.player-link:after{content:"▶";font-size:9px;color:var(--orange);border:1px solid #75432f;border-radius:50%;width:17px;height:17px;display:inline-grid;place-items:center;padding-left:1px}
+.player-link:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+.video-modal{position:fixed;inset:0;z-index:50;background:#02070bdc;display:none;align-items:center;justify-content:center;padding:18px}
+.video-modal.open{display:flex}
+.video-panel{width:min(560px,100%);background:#111b25;border:1px solid #3b4d5c;border-radius:18px;padding:20px;box-shadow:0 24px 80px #0009}
+.video-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.video-top h3{margin:0;font-size:20px}
+.video-close{border:1px solid var(--line);background:#0a131b;color:#dce5ed;border-radius:9px;padding:7px 11px;cursor:pointer}
+.video-screen{margin:16px 0 13px;aspect-ratio:16/9;border-radius:12px;background:radial-gradient(circle at 50% 38%,#344c5c,#111a22 70%);border:1px solid #40515e;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px}
+.video-screen .play{width:58px;height:58px;border-radius:50%;background:var(--orange);color:#1b100b;display:grid;place-items:center;font-size:22px;margin:0 auto 12px;padding-left:3px}
+.video-screen p{font-size:12px;color:#c2ced8;line-height:1.7;margin:0}
+.video-actions{display:flex;gap:9px;flex-wrap:wrap}
+.video-action{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:10px;padding:12px 14px;font-size:12px;font-weight:800;background:var(--orange);color:#1b100b;flex:1;min-width:180px}
+.video-action.alt{background:#1a2a36;color:#e4edf4;border:1px solid var(--line)}
+.video-caption{font-size:10px;color:var(--muted);line-height:1.7;margin-top:12px}
+
+
+.video-screen{display:block;position:relative;padding:0;overflow:hidden;background:#05090d}
+.video-screen iframe{display:block;width:100%;height:100%;min-height:220px;border:0}
+.video-screen .video-placeholder{height:100%;min-height:220px;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
+.video-screen .video-placeholder p{max-width:360px}
+\n</style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div class="brand">COURTSIDE <span>LAB</span> / NBA BODY MATCH</div><div class="tag">身体模板匹配实验室 · V4</div></header>
+<header class="top"><div class="brand">COURTSIDE <span>LAB</span> / NBA BODY MATCH</div><div class="tag">身体模板匹配实验室 · V6</div></header>
 <section class="hero"><div class="eyebrow">FIND YOUR NBA BODY ARCHETYPE</div><h1>你的身体数据，<br><em>像哪位 NBA 球星？</em></h1><p>不是简单比较谁更高、谁更重。我们先把你的身高放进普通人基准区间，再映射到 NBA 身高区间，最后结合场上位置、臂展比例与体型指标，寻找身体模板接近的球员。</p></section>
 <main class="layout">
 <section class="card">
@@ -38,15 +61,25 @@ button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:22px
 <div class="hint" style="text-align:center;margin-top:8px">无需注册 · 免费使用 · 数据只在当前浏览器计算</div>
 </section>
 <section class="card">
-<div class="results-head"><div><h2>身体模板报告</h2><div class="sub" style="margin:5px 0 0">匹配度是模型内部相似度分数，不是概率</div></div><button class="secondary" id="reset">重置</button></div>
+<div class="results-head"><div><h2>身体模板报告</h2><div class="sub" style="margin:5px 0 0">点击球星姓名可直接播放经典视频 · 匹配度是模型内部相似度分数</div></div><button class="secondary" id="reset">重置</button></div>
 <div id="empty" class="empty"><div class="ball">🏀</div><b style="color:#e6edf3">等待你的身体数据</b><p style="font-size:12px;max-width:310px;line-height:1.8">输入三项数据并选择场上位置。报告会展示身高映射过程、最接近的球员，以及各项身体指标的接近程度。</p></div>
 <div id="results" class="hidden"></div>
 <div class="note"><strong>匹配逻辑升级：</strong>身高映射仍严格使用普通人 160–200 cm → NBA 160–224 cm；位置用于优先排序；综合分由映射身高、臂展/身高比和 BMI 三项构成。</div>
 <details class="method"><summary>查看算法说明与数据限制</summary><p>普通人区间位置 = (你的身高 − 160) ÷ 40；NBA 映射身高 = 160 + 区间位置 × 64。综合分采用启发式距离模型，权重为映射身高 45%、臂展/身高比 35%、BMI 20%。位置相同的球员优先展示；邻近位置作为补充。球员身高、臂展、体重均为近似参考数据，不同来源和赛季可能存在差异。该工具仅作娱乐和体型比较，不代表球技、运动能力或专业体测结论。</p></details>
 </section>
 </main>
-<div class="footer">COURTSIDE LAB · NBA BODY MATCH V4<br>数据为原型参考值；不构成官方 NBA 数据库、医学建议或运动能力评估。</div>
+<div class="footer">COURTSIDE LAB · NBA BODY MATCH V6<br>数据为原型参考值；不构成官方 NBA 数据库、医学建议或运动能力评估。</div>
 </div>
+
+<div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-labelledby="videoTitle">
+ <div class="video-panel">
+  <div class="video-top"><div><div class="eyebrow">PLAYER HIGHLIGHTS</div><h3 id="videoTitle">球星经典进球</h3></div><button class="video-close" id="closeVideo" aria-label="关闭">关闭 ✕</button></div>
+  <div class="video-screen" id="videoScreen"><div><div class="play">▶</div><p id="videoPrompt">选择球星后，将在这里直接播放经典集锦</p></div></div>
+  <div class="video-actions"><a class="video-action" id="biliFallback" href="#" target="_blank" rel="noopener">在哔哩哔哩查看该球星视频</a></div>
+  <div class="video-caption" id="videoCaption">优先在本站内嵌播放哔哩哔哩视频；若视频作者关闭了嵌入、视频下架或平台限制播放，可点击备用入口。视频由第三方平台托管。</div>
+ </div>
+</div>
+
 <script>
 const players=[
 ["斯蒂芬·库里","Stephen Curry","金州勇士","现役参考",188,192,84,"PG"],
@@ -77,6 +110,48 @@ const players=[
 ];
 const $=id=>document.getElementById(id);let selectedPosition="SF";let latest=[];
 const posName={PG:"控球后卫 PG",SG:"得分后卫 SG",SF:"小前锋 SF",PF:"大前锋 PF",C:"中锋 C"};
+
+const videoModal=$("videoModal");
+const playerVideos={
+ "Michael Jordan":{bvid:"BV1baEs6AEtf",title:"乔丹职业生涯纯享版集锦"},
+ "Kobe Bryant":{bvid:"BV1wx411D7ou",title:"科比退役最后一战 60 分集锦"},
+ "LeBron James":{bvid:"BV1Hp3v6eESW",title:"詹姆斯生涯代表战集锦"},
+ "Allen Iverson":{bvid:"BV1XdEF6zEZW",title:"艾弗森生涯十佳球"},
+ "Stephen Curry":{bvid:"BV1GSXPY6EDr",title:"库里投篮姿势与三分训练集锦"},
+ "Yao Ming":{bvid:"BV1ngjv63EAf",title:"姚明生涯集锦"}
+};
+function openPlayerVideo(enName,cnName){
+ const item=playerVideos[enName];
+ const query=encodeURIComponent(cnName+" NBA 经典进球 集锦");
+ $("videoTitle").textContent=cnName+" · 经典进球";
+ $("biliFallback").href="https://search.bilibili.com/all?keyword="+query;
+ const screen=$("videoScreen");
+ if(item){
+  screen.innerHTML='<iframe id="biliPlayer" title="'+cnName+'经典视频" src="https://player.bilibili.com/player.html?bvid='+item.bvid+'&autoplay=0&page=1" allowfullscreen="true" scrolling="no" referrerpolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture"></iframe>';
+  $("videoPrompt").textContent="";
+  $("videoCaption").textContent="视频："+item.title+"。已尝试在本站内嵌播放；如果出现黑屏或“禁止嵌入”，可使用下方哔哩哔哩备用入口。视频版权归原作者及相关权利方所有。";
+  $("biliFallback").textContent="无法播放？前往哔哩哔哩打开视频";
+ }else{
+  screen.innerHTML='<div class="video-placeholder"><div><div class="play">▶</div><p>这位球星的内嵌视频还在整理中。你可以先在哔哩哔哩查看相关集锦。</p></div></div>';
+  $("videoCaption").textContent="为了避免跳转 YouTube，这里优先使用哔哩哔哩视频。该球星的精选内嵌视频尚未加入，暂时提供站内搜索入口。";
+  $("biliFallback").textContent="在哔哩哔哩查看 "+cnName+" 的视频";
+ }
+ videoModal.classList.add("open");
+ $("closeVideo").focus();
+}
+function closePlayerVideo(){
+ videoModal.classList.remove("open");
+ const frame=document.getElementById("biliPlayer");
+ if(frame)frame.src="about:blank";
+}
+$("closeVideo").addEventListener("click",closePlayerVideo);
+videoModal.addEventListener("click",e=>{if(e.target===videoModal)closePlayerVideo();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerVideo();});
+$("results").addEventListener("click",e=>{
+ const btn=e.target.closest(".player-link");
+ if(btn)openPlayerVideo(decodeURIComponent(btn.dataset.player),btn.dataset.cn);
+});
+
 document.querySelectorAll(".pos").forEach(btn=>btn.addEventListener("click",()=>{selectedPosition=btn.dataset.pos;document.querySelectorAll(".pos").forEach(b=>b.classList.toggle("active",b===btn));}));
 function clamp(n){return Math.max(0,Math.min(100,Math.round(n)));}
 function closeness(diff,scale){return Math.exp(-.5*Math.pow(diff/scale,2));}
@@ -97,14 +172,14 @@ function match(){
  const top=latest.slice(0,8);
  let out=`<div class="mapbox"><div class="maptitle"><span>你的身高映射结果</span><span>${h.toFixed(1)} cm → ${mapped.toFixed(1)} cm</span></div><div class="scale"><i class="marker" style="left:${marker}%"></i></div><div class="scale-labels"><span>普通人 160 cm</span><span>普通人 200 cm</span></div><div class="mapdesc">你位于普通人基准区间的 <b style="color:#f2c66d">${(percentile*100).toFixed(1)}%</b> 位置，对应 NBA 基准身高 ${mapped.toFixed(1)} cm。按相同比例换算的参考臂展：${mappedWing.toFixed(1)} cm。<br>所选位置：${posName[selectedPosition]} · 你的臂展/身高比：${(wingRatio*100).toFixed(1)}% · BMI：${bmi.toFixed(1)}</div></div>`;
  out+=`<div class="controls"><span class="count">展示前 ${top.length} 位 / 数据库 ${players.length} 位</span><select id="sortMode" aria-label="排序方式"><option value="overall">综合匹配排序</option><option value="height">身高映射优先</option><option value="wingspan">臂展比例优先</option><option value="weight">体型指标优先</option></select></div>`;
- out+=top.map((x,i)=>{const p=x.p;return `<article class="result"><div class="rank">#${i+1}<div class="avatar">${p[0].slice(0,2)}</div></div><div><div class="name">${p[0]}</div><div class="meta">${p[1]} · ${p[2]} · ${p[3]} · ${p[7]} · ${x.pos}</div><div class="stats"><span class="pill">身高 ${p[4]} cm</span><span class="pill">臂展 ${p[5]} cm</span><span class="pill">体重 ${p[6]} kg</span><span class="pill">臂展比 ${(p[5]/p[4]*100).toFixed(1)}%</span></div><div class="bar"><i style="width:${x.score}%"></i></div></div><div class="score"><div class="percent">${x.score}</div><small>相似度分数</small></div><div class="details"><div class="metric"><b>身高接近 ${x.sH}%</b><div class="mini"><i style="width:${x.sH}%"></i></div></div><div class="metric"><b>臂展比例 ${x.sW}%</b><div class="mini"><i style="width:${x.sW}%"></i></div></div><div class="metric"><b>体型指标 ${x.sB}%</b><div class="mini"><i style="width:${x.sB}%"></i></div></div></div></article>`}).join("");
+ out+=top.map((x,i)=>{const p=x.p;return `<article class="result"><div class="rank">#${i+1}<div class="avatar">${p[0].slice(0,2)}</div></div><div><button class="player-link" type="button" data-player="${encodeURIComponent(p[1])}" data-cn="${p[0]}">${p[0]}</button><div class="meta">${p[1]} · ${p[2]} · ${p[3]} · ${p[7]} · ${x.pos}</div><div class="stats"><span class="pill">身高 ${p[4]} cm</span><span class="pill">臂展 ${p[5]} cm</span><span class="pill">体重 ${p[6]} kg</span><span class="pill">臂展比 ${(p[5]/p[4]*100).toFixed(1)}%</span></div><div class="bar"><i style="width:${x.score}%"></i></div></div><div class="score"><div class="percent">${x.score}</div><small>相似度分数</small></div><div class="details"><div class="metric"><b>身高接近 ${x.sH}%</b><div class="mini"><i style="width:${x.sH}%"></i></div></div><div class="metric"><b>臂展比例 ${x.sW}%</b><div class="mini"><i style="width:${x.sW}%"></i></div></div><div class="metric"><b>体型指标 ${x.sB}%</b><div class="mini"><i style="width:${x.sB}%"></i></div></div></div></article>`}).join("");
  $("empty").classList.add("hidden");$("results").classList.remove("hidden");$("results").innerHTML=out;
  $("sortMode").addEventListener("change",e=>{const key={overall:"score",height:"sH",wingspan:"sW",weight:"sB"}[e.target.value];const sorted=[...latest].sort((a,b)=>b[key]-a[key]);renderSorted(sorted,h,mapped,percentile,mappedWing,wingRatio,bmi);});
 }
 function renderSorted(sorted,h,mapped,percentile,mappedWing,wingRatio,bmi){
  const mode=$("sortMode").value,key={overall:"score",height:"sH",wingspan:"sW",weight:"sB"}[mode],top=sorted.slice(0,8);
  const existing=$("results").querySelectorAll(".result");existing.forEach(x=>x.remove());
- top.forEach((x,i)=>{const p=x.p;const el=document.createElement("article");el.className="result";el.innerHTML=`<div class="rank">#${i+1}<div class="avatar">${p[0].slice(0,2)}</div></div><div><div class="name">${p[0]}</div><div class="meta">${p[1]} · ${p[2]} · ${p[3]} · ${p[7]} · ${x.pos}</div><div class="stats"><span class="pill">身高 ${p[4]} cm</span><span class="pill">臂展 ${p[5]} cm</span><span class="pill">体重 ${p[6]} kg</span><span class="pill">臂展比 ${(p[5]/p[4]*100).toFixed(1)}%</span></div><div class="bar"><i style="width:${x.score}%"></i></div></div><div class="score"><div class="percent">${x.score}</div><small>相似度分数</small></div><div class="details"><div class="metric"><b>身高接近 ${x.sH}%</b><div class="mini"><i style="width:${x.sH}%"></i></div></div><div class="metric"><b>臂展比例 ${x.sW}%</b><div class="mini"><i style="width:${x.sW}%"></i></div></div><div class="metric"><b>体型指标 ${x.sB}%</b><div class="mini"><i style="width:${x.sB}%"></i></div></div></div>`;$("results").appendChild(el);});
+ top.forEach((x,i)=>{const p=x.p;const el=document.createElement("article");el.className="result";el.innerHTML=`<div class="rank">#${i+1}<div class="avatar">${p[0].slice(0,2)}</div></div><div><button class="player-link" type="button" data-player="${encodeURIComponent(p[1])}" data-cn="${p[0]}">${p[0]}</button><div class="meta">${p[1]} · ${p[2]} · ${p[3]} · ${p[7]} · ${x.pos}</div><div class="stats"><span class="pill">身高 ${p[4]} cm</span><span class="pill">臂展 ${p[5]} cm</span><span class="pill">体重 ${p[6]} kg</span><span class="pill">臂展比 ${(p[5]/p[4]*100).toFixed(1)}%</span></div><div class="bar"><i style="width:${x.score}%"></i></div></div><div class="score"><div class="percent">${x.score}</div><small>相似度分数</small></div><div class="details"><div class="metric"><b>身高接近 ${x.sH}%</b><div class="mini"><i style="width:${x.sH}%"></i></div></div><div class="metric"><b>臂展比例 ${x.sW}%</b><div class="mini"><i style="width:${x.sW}%"></i></div></div><div class="metric"><b>体型指标 ${x.sB}%</b><div class="mini"><i style="width:${x.sB}%"></i></div></div></div>`;$("results").appendChild(el);});
 }
 $("match").addEventListener("click",match);
 $("reset").addEventListener("click",()=>{$("height").value=$("wingspan").value=$("weight").value="";selectedPosition="SF";document.querySelectorAll(".pos").forEach(b=>b.classList.toggle("active",b.dataset.pos==="SF"));$("error").textContent="";$("results").innerHTML="";$("results").classList.add("hidden");$("empty").classList.remove("hidden");});
