@@ -118,24 +118,60 @@ const posName={PG:"控球后卫 PG",SG:"得分后卫 SG",SF:"小前锋 SF",PF:"�
 
 const videoModal=$("videoModal");
 const playerVideos={
- "Michael Jordan":{bvid:"BV1baEs6AEtf",title:"乔丹职业生涯纯享版集锦"},
- "Kobe Bryant":{bvid:"BV1wx411D7ou",title:"科比退役最后一战 60 分集锦"},
- "LeBron James":{bvid:"BV1Hp3v6eESW",title:"詹姆斯生涯代表战集锦"},
- "Allen Iverson":{bvid:"BV1XdEF6zEZW",title:"艾弗森生涯十佳球"},
- "Stephen Curry":{bvid:"BV1GSXPY6EDr",title:"库里投篮姿势与三分训练集锦"},
- "Yao Ming":{bvid:"BV1ngjv63EAf",title:"姚明生涯集锦"}
+ "Michael Jordan":[
+  {bvid:"BV1baEs6AEtf",title:"乔丹职业生涯纯享版集锦"},
+  {bvid:"BV1P3tBzqEzc",title:"乔丹15年NBA生涯回顾"}
+ ],
+ "Kobe Bryant":[
+  {bvid:"BV1sUNW6xEVS",title:"科比退役战60分全场集锦"},
+  {bvid:"BV1wx411D7ou",title:"科比经典集锦（备用）"}
+ ],
+ "LeBron James":[
+  {bvid:"BV1dAuS6dEhT",title:"詹姆斯职业生涯合集"}
+ ],
+ "Allen Iverson":[
+  {bvid:"BV1XdEF6zEZW",title:"艾弗森生涯十佳球"}
+ ],
+ "Stephen Curry":[
+  {bvid:"BV1GSXPY6EDr",title:"库里投篮与三分集锦"}
+ ],
+ "Yao Ming":[
+  {bvid:"BV1ngjv63EAf",title:"姚明生涯集锦"},
+  {bvid:"BV1of2QBoEHK",title:"火箭官方制作的姚明生涯集锦"}
+ ],
+ "Shaquille O'Neal":[
+  {bvid:"BV1Q84y1D7Cy",title:"巅峰奥尼尔篮下统治力集锦"}
+ ],
+ "Tim Duncan":[
+  {bvid:"BV1UCNA6MEq1",title:"邓肯退役十周年纪念混剪"}
+ ]
 };
 function openPlayerVideo(enName,cnName){
- const item=playerVideos[enName];
+ const items=playerVideos[enName];
  const query=encodeURIComponent(cnName+" NBA 经典进球 集锦");
  $("videoTitle").textContent=cnName+" · 经典进球";
  $("biliFallback").href="https://search.bilibili.com/all?keyword="+query;
+ const oldChoices=$("videoChoices");
+ if(oldChoices)oldChoices.remove();
  const screen=$("videoScreen");
- if(item){
+ if(items && items.length){
+  const item=items[0];
+  const choices=items.length>1?'<div class="video-actions" id="videoChoices">'+items.map((v,i)=>'<button class="video-action alt" type="button" data-video-index="'+i+'">'+(i+1)+'. '+v.title+'</button>').join('')+'</div>':'';
   screen.innerHTML='<iframe id="biliPlayer" title="'+cnName+'经典视频" src="https://player.bilibili.com/player.html?bvid='+item.bvid+'&autoplay=0&page=1" allowfullscreen="true" scrolling="no" referrerpolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture"></iframe>';
   $("videoPrompt").textContent="";
-  $("videoCaption").textContent="视频："+item.title+"。已尝试在本站内嵌播放；如果出现黑屏或“禁止嵌入”，可使用下方哔哩哔哩备用入口。视频版权归原作者及相关权利方所有。";
+  $("videoCaption").textContent="当前视频："+item.title+"。若无法内嵌播放，可使用下方哔哩哔哩备用入口。视频由第三方平台托管。";
   $("biliFallback").textContent="无法播放？前往哔哩哔哩打开视频";
+  if(choices){
+   screen.insertAdjacentHTML("afterend",choices);
+   $("videoChoices").addEventListener("click",e=>{
+    const b=e.target.closest("[data-video-index]");
+    if(!b)return;
+    const selected=items[Number(b.dataset.videoIndex)];
+    const frame=document.getElementById("biliPlayer");
+    frame.src="https://player.bilibili.com/player.html?bvid="+selected.bvid+"&autoplay=0&page=1";
+    $("videoCaption").textContent="当前视频："+selected.title+"。视频由第三方平台托管。";
+   });
+  }
  }else{
   screen.innerHTML='<div class="video-placeholder"><div><div class="play">▶</div><p>这位球星的内嵌视频还在整理中。你可以先在哔哩哔哩查看相关集锦。</p></div></div>';
   $("videoCaption").textContent="为了避免跳转 YouTube，这里优先使用哔哩哔哩视频。该球星的精选内嵌视频尚未加入，暂时提供站内搜索入口。";
